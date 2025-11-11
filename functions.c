@@ -92,3 +92,72 @@ void copy_vector(Vector *dest, const Vector *src) {
         dest->data = NULL;
     }
 }
+
+Vector *copy_vector_new(const Vector *src) {
+    if (!src) {
+        return NULL;
+    }
+    
+    Vector *new_vec = (Vector*)malloc(sizeof(Vector));
+    if (!new_vec) {
+        return NULL;
+    }
+    
+    new_vec->size = src->size;
+    new_vec->capacity = src->capacity;
+    new_vec->CopyVoidPtr = src->CopyVoidPtr;
+    new_vec->DeleteVoidPtr = src->DeleteVoidPtr;
+    
+    if (src->capacity > 0) {
+        new_vec->data = (VECTOR_TYPE*)malloc(src->capacity * sizeof(VECTOR_TYPE));
+        if (!new_vec->data) {
+            free(new_vec);
+            return NULL;
+        }
+        
+        for (size_t i = 0; i < src->size; i++) {
+            new_vec->data[i] = new_vec->CopyVoidPtr(src->data[i]);
+        }
+    } else {
+        new_vec->data = NULL;
+    }
+    
+    return new_vec;
+}
+
+void push_back_vector(Vector *v, VECTOR_TYPE value) {
+    if (!v) {
+        return;
+    }
+    
+    if (v->size >= v->capacity) {
+        size_t new_capacity;
+        if (v->capacity == 0) {
+            new_capacity = 1;
+        } else {
+            new_capacity = v->capacity * 2;
+        }
+        VECTOR_TYPE *new_data = (VECTOR_TYPE*)realloc(v->data, new_capacity * sizeof(VECTOR_TYPE));
+        if (!new_data) {
+            return;
+        }
+        v->data = new_data;
+        v->capacity = new_capacity;
+    }
+    
+    v->data[v->size] = v->CopyVoidPtr(value);
+    v->size++;
+}
+
+void delete_at_vector(Vector *v, size_t index) {
+    if (!v || index >= v->size) {
+        return;
+    }
+    v->DeleteVoidPtr(v->data[index]);
+
+    for (size_t i = index; i < v->size - 1; i++) {
+        v->data[i] = v->data[i + 1];
+    }
+    v->size--;
+}
+
