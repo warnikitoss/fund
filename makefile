@@ -1,27 +1,22 @@
 CC = gcc
 CFLAGS = -Wall -Werror -Wextra -Wpedantic -fsanitize=address
-CLIBS = -lm
+TARGET = main
+TEST_TARGET = tests
 
-SOURCES = functions.c
-TEST_SOURCES = tests.c functions.c
-EXECUTABLE = laba
-TEST_EXECUTABLE = tests
+.PHONY: all test clean
 
-.PHONY: all test clean unit_test
+all: $(TARGET)
 
-all: $(TEST_EXECUTABLE)
+$(TARGET): main.c vector.h
+	@$(CC) $(CFLAGS) main.c -o $(TARGET)
 
-$(TEST_EXECUTABLE): $(TEST_SOURCES)
-	@$(CC) $(CFLAGS) $(TEST_SOURCES) -o $(TEST_EXECUTABLE) $(CLIBS)
+$(TEST_TARGET): tests.c vector.h
+	@$(CC) $(CFLAGS) tests.c -o $(TEST_TARGET)
 
-clean:
-	@rm -f $(EXECUTABLE) $(TEST_EXECUTABLE)
-
-unit_test: $(TEST_EXECUTABLE)
+test: $(TEST_TARGET)
 	@echo "=== Running unit tests ==="
-	@./$(TEST_EXECUTABLE)
+	@./$(TEST_TARGET)
 	@echo "=== Unit tests completed ==="
 
-test: unit_test
-	@echo ""
-	@echo "=== All tests completed successfully! ==="
+clean:
+	@rm -f $(TARGET) $(TEST_TARGET)
